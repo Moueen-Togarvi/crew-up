@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useApp } from '@/lib/store'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
@@ -38,10 +39,10 @@ const NOTIF_ICON: Record<string, string> = {
 }
 
 export function AppTopbar() {
+  const router = useRouter()
   const user = useApp((s) => s.user)
   const logout = useApp((s) => s.logout)
   const setView = useApp((s) => s.setView)
-  const openAuth = useApp((s) => s.openAuth)
   const openJob = useApp((s) => s.openJob)
   const openConversation = useApp((s) => s.openConversation)
   const setCommandPaletteOpen = useApp((s) => s.setCommandPaletteOpen)
@@ -232,8 +233,8 @@ export function AppTopbar() {
           </>
         ) : (
           <>
-            <Button variant="ghost" onClick={() => openAuth('login')}>Log in</Button>
-            <Button onClick={() => openAuth('signup')}>Get started</Button>
+            <Button variant="ghost" onClick={() => router.push('/login')}>Log in</Button>
+            <Button onClick={() => router.push('/signup')}>Get started</Button>
           </>
         )}
       </div>

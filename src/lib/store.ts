@@ -1,6 +1,7 @@
 'use client'
 
 import { create } from 'zustand'
+import { useRouter } from 'next/navigation'
 import type { PublicUser, JobWithRelations } from './constants'
 import { api } from './api'
 
@@ -27,8 +28,6 @@ interface AppState {
   // auth
   user: PublicUser | null
   authLoading: boolean
-  authModalOpen: boolean
-  authMode: 'login' | 'signup'
   authResolved: boolean
   // navigation
   view: View
@@ -44,8 +43,6 @@ interface AppState {
   // actions
   setView: (v: View) => void
   setCommandPaletteOpen: (open: boolean) => void
-  openAuth: (mode?: 'login' | 'signup') => void
-  closeAuth: () => void
   setUser: (u: PublicUser | null) => void
   refreshUser: () => Promise<void>
   logout: () => Promise<void>
@@ -59,8 +56,6 @@ interface AppState {
 export const useApp = create<AppState>((set, get) => ({
   user: null,
   authLoading: true,
-  authModalOpen: false,
-  authMode: 'login',
   authResolved: false,
   view: 'landing',
   activeJobId: null,
@@ -76,8 +71,6 @@ export const useApp = create<AppState>((set, get) => ({
     if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
   },
   setCommandPaletteOpen: (open) => set({ commandPaletteOpen: open }),
-  openAuth: (mode = 'login') => set({ authModalOpen: true, authMode: mode }),
-  closeAuth: () => set({ authModalOpen: false }),
   setUser: (u) => set({ user: u }),
   refreshUser: async () => {
     try {
@@ -114,10 +107,10 @@ export const useApp = create<AppState>((set, get) => ({
 // helper hook for components
 export function useRequireAuth() {
   const user = useApp((s) => s.user)
-  const openAuth = useApp((s) => s.openAuth)
+  const router = useRouter()
   return (cb?: () => void) => {
     if (!user) {
-      openAuth('login')
+      router.push('/login')
       return false
     }
     cb?.()

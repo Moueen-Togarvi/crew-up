@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useApp } from '@/lib/store'
 import { api } from '@/lib/api'
 import type { JobWithRelations, PublicUser } from '@/lib/constants'
@@ -195,12 +196,12 @@ function getTradeAccent(trade: string | null | undefined): string {
 /* ──────────────────── Main Component ──────────────────── */
 
 export function JobDetailView() {
+  const router = useRouter()
   const jobId = useApp((s) => s.activeJobId)
   const user = useApp((s) => s.user)
   const setView = useApp((s) => s.setView)
   const openProfile = useApp((s) => s.openProfile)
   const openConversation = useApp((s) => s.openConversation)
-  const openAuth = useApp((s) => s.openAuth)
   const { toast } = useToast()
 
   const [job, setJob] = useState<JobWithRelations | null>(null)
@@ -237,7 +238,7 @@ export function JobDetailView() {
   useEffect(() => { load() }, [jobId])
 
   const submitBid = async () => {
-    if (!user) { openAuth('login'); return }
+    if (!user) { router.push('/login'); return }
     if (user.role !== 'SUBCONTRACTOR') {
       toast({ title: 'Only subcontractors can bid', variant: 'destructive' })
       return
@@ -281,7 +282,7 @@ export function JobDetailView() {
   }
 
   const messageContractor = async () => {
-    if (!user) { openAuth('login'); return }
+    if (!user) { router.push('/login'); return }
     if (!job) return
     try {
       const { conversationId } = await api<{ conversationId: string }>('/api/messages/conversations', {
@@ -294,7 +295,7 @@ export function JobDetailView() {
   }
 
   const messageAssignedSub = async () => {
-    if (!user) { openAuth('login'); return }
+    if (!user) { router.push('/login'); return }
     if (!job) return
     const acceptedBid = job.bids.find((b) => b.status === 'ACCEPTED')
     if (!acceptedBid) return
@@ -834,7 +835,7 @@ export function JobDetailView() {
               ) : !user ? (
                 <div className="mt-3 space-y-2">
                   <p className="text-sm text-muted-foreground">Sign up as a subcontractor to bid on this job.</p>
-                  <Button className="w-full" onClick={() => openAuth('signup')}>Sign up to bid</Button>
+                  <Button className="w-full" onClick={() => router.push('/signup')}>Sign up to bid</Button>
                 </div>
               ) : (
                 <p className="mt-3 text-sm text-muted-foreground">Only subcontractor accounts can bid on jobs.</p>

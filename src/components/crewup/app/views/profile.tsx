@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useApp } from '@/lib/store'
 import { api } from '@/lib/api'
 import type { JobWithRelations, PublicUser } from '@/lib/constants'
@@ -85,11 +86,11 @@ function tradeIcon(trade: string): React.ElementType {
 }
 
 export function ProfileView() {
+  const router = useRouter()
   const profileUserId = useApp((s) => s.profileUserId)
   const user = useApp((s) => s.user)!
   const openJob = useApp((s) => s.openJob)
   const openConversation = useApp((s) => s.openConversation)
-  const openAuth = useApp((s) => s.openAuth)
   const setView = useApp((s) => s.setView)
   const { toast } = useToast()
 
@@ -180,7 +181,7 @@ export function ProfileView() {
 
   const messageUser = async () => {
     if (!profile) return
-    if (!user) { openAuth('login'); return }
+    if (!user) { router.push('/login'); return }
     try {
       const { conversationId } = await api<{ conversationId: string }>('/api/messages/conversations', {
         method: 'POST', body: { targetUserId: profile.id, body: `Hi ${profile.name.split(' ')[0]}, I'd like to connect.` },
@@ -216,7 +217,7 @@ export function ProfileView() {
 
   const submitReview = async () => {
     if (!profile) return
-    if (!user) { openAuth('login'); return }
+    if (!user) { router.push('/login'); return }
     if (!reviewText) { toast({ title: 'Please write a review', variant: 'destructive' }); return }
     setSubmittingReview(true)
     try {

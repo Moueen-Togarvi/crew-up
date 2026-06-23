@@ -94,7 +94,7 @@ function distanceBetween(a: string | null, b: string | null): number {
   return Math.sqrt(dx * dx + dy * dy) * 25
 }
 
-function cityKey(city: string | null, state: string | null): string | null {
+function cityKey(city: string | null | undefined, state: string | null | undefined): string | null {
   if (!city) return null
   return state ? `${city}, ${state}` : city
 }

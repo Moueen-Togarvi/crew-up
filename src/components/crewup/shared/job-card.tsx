@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import type { JobWithRelations } from '@/lib/constants'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -32,10 +33,10 @@ function tradeAccent(trade: string) {
 }
 
 export function JobCard({ job }: { job: JobWithRelations }) {
+  const router = useRouter()
   const openJob = useApp((s) => s.openJob)
   const openProfile = useApp((s) => s.openProfile)
   const user = useApp((s) => s.user)
-  const openAuth = useApp((s) => s.openAuth)
   const { toast } = useToast()
   const bidCount = job._count?.bids ?? job.bids?.length ?? 0
   const [fav, setFav] = useState(false)
@@ -59,7 +60,7 @@ export function JobCard({ job }: { job: JobWithRelations }) {
 
   const toggleFav = async (e: React.MouseEvent) => {
     e.stopPropagation()
-    if (!user) { openAuth('login'); return }
+    if (!user) { router.push('/login'); return }
     setFavLoading(true)
     const wasFav = fav
     setFav(!wasFav)

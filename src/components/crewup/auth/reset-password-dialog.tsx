@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,6 +16,7 @@ interface ResetPasswordDialogProps {
 }
 
 export function ResetPasswordDialog({ open, onClose }: ResetPasswordDialogProps) {
+  const router = useRouter()
   const { toast } = useToast()
   const { setUser, setView } = useApp()
   const [loading, setLoading] = useState(false)
@@ -61,7 +63,7 @@ export function ResetPasswordDialog({ open, onClose }: ResetPasswordDialogProps)
     const url = new URL(window.location.href)
     url.searchParams.delete('token')
     window.history.replaceState({}, '', url.toString())
-    setView('login')
+    router.push('/login')
   }
 
   return (

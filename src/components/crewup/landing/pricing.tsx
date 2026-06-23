@@ -2,13 +2,14 @@
 
 import { PLANS } from '@/lib/constants'
 import { useApp } from '@/lib/store'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Check, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export function Pricing() {
-  const openAuth = useApp((s) => s.openAuth)
+  const router = useRouter()
   const setView = useApp((s) => s.setView)
   const user = useApp((s) => s.user)
 
@@ -67,7 +68,7 @@ export function Pricing() {
                 className="mt-7 w-full transition-transform hover:scale-[1.02]"
                 variant={plan.highlight ? 'default' : 'outline'}
                 onClick={() => {
-                  if (!user) openAuth('signup')
+                  if (!user) router.push('/signup')
                   else if (plan.id === 'FREE') setView('dashboard')
                   else setView('billing')
                 }}

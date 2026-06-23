@@ -28,7 +28,7 @@ export const signupSchema = z.object({
   password: z.string().min(8, 'Password must be at least 8 characters'),
   name: z.string().min(1, 'Name is required'),
   role: z.enum(['CONTRACTOR', 'SUBCONTRACTOR'], {
-    errorMap: () => ({ message: 'Invalid role' })
+    message: 'Invalid role'
   }),
   company: z.string().optional().nullable(),
   trade: z.string().optional().nullable(),

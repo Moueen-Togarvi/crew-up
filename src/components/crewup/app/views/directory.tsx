@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useApp } from '@/lib/store'
 import { api } from '@/lib/api'
 import type { JobWithRelations, PublicUser } from '@/lib/constants'
@@ -19,12 +20,12 @@ import { cn } from '@/lib/utils'
 import { useToast } from '@/hooks/use-toast'
 
 export function DirectoryView() {
+  const router = useRouter()
   const directoryRole = useApp((s) => s.directoryRole)
   const setDirectoryRole = useApp((s) => s.setDirectoryRole)
   const user = useApp((s) => s.user)
   const openProfile = useApp((s) => s.openProfile)
   const openJob = useApp((s) => s.openJob)
-  const openAuth = useApp((s) => s.openAuth)
   const { toast } = useToast()
 
   const [q, setQ] = useState('')
@@ -90,7 +91,7 @@ export function DirectoryView() {
   }, [browsingJobs])
 
   const toggleSubFav = async (subId: string) => {
-    if (!user) { openAuth('login'); return }
+    if (!user) { router.push('/login'); return }
     setFavBusy((s) => new Set(s).add(subId))
     const wasFav = favIds.has(subId)
     setFavIds((s) => {
@@ -339,7 +340,7 @@ export function DirectoryView() {
                 </div>
 
                 {!user && (
-                  <Button size="sm" variant="outline" className="mt-3 w-full" onClick={(e) => { e.stopPropagation(); openAuth('signup') }}>
+                  <Button size="sm" variant="outline" className="mt-3 w-full" onClick={(e) => { e.stopPropagation(); router.push('/signup') }}>
                     <MessageSquare className="mr-1.5 h-3.5 w-3.5" /> Sign up to contact
                   </Button>
                 )}

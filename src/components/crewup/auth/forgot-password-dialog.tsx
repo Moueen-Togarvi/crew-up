@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,6 +16,7 @@ interface ForgotPasswordDialogProps {
 }
 
 export function ForgotPasswordDialog({ open, onClose }: ForgotPasswordDialogProps) {
+  const router = useRouter()
   const { toast } = useToast()
   const { setUser, setView } = useApp()
   const [loading, setLoading] = useState(false)
@@ -88,7 +90,7 @@ export function ForgotPasswordDialog({ open, onClose }: ForgotPasswordDialogProp
             <div className="flex justify-center pt-4">
               <button
                 type="button"
-                onClick={() => { onClose(); setView('login'); }}
+                onClick={() => { onClose(); router.push('/login'); }}
                 className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
               >
                 <ArrowLeft className="h-4 w-4" />

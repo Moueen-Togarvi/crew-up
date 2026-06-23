@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useApp } from '@/lib/store'
+import { useRouter } from 'next/navigation'
 import { Logo } from '@/components/crewup/shared/logo'
 import { Button } from '@/components/ui/button'
 import { Menu, X, HardHat, Wrench } from 'lucide-react'
@@ -15,7 +15,7 @@ const navLinks = [
 ]
 
 export function LandingNavbar() {
-  const openAuth = useApp((s) => s.openAuth)
+  const router = useRouter()
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
 
@@ -56,10 +56,10 @@ export function LandingNavbar() {
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
-          <Button variant="ghost" onClick={() => openAuth('login')} className="font-medium">
+          <Button variant="ghost" onClick={() => router.push('/login')} className="font-medium">
             Log in
           </Button>
-          <Button onClick={() => openAuth('signup')} className="font-semibold shadow-sm">
+          <Button onClick={() => router.push('/signup')} className="font-semibold shadow-sm">
             Get started
           </Button>
         </div>
@@ -87,10 +87,10 @@ export function LandingNavbar() {
               </button>
             ))}
             <div className="mt-2 flex flex-col gap-2">
-              <Button variant="outline" onClick={() => { setOpen(false); openAuth('login') }}>
+              <Button variant="outline" onClick={() => { setOpen(false); router.push('/login') }}>
                 Log in
               </Button>
-              <Button onClick={() => { setOpen(false); openAuth('signup') }}>
+              <Button onClick={() => { setOpen(false); router.push('/signup') }}>
                 Get started
               </Button>
             </div>

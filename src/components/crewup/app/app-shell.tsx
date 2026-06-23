@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useApp } from '@/lib/store'
 import { AppSidebar } from './app-sidebar'
 import { AppTopbar } from './app-topbar'
@@ -28,9 +29,9 @@ import { MobileNav } from './mobile-nav'
 const AUTH_VIEWS = ['dashboard', 'post-job', 'messages', 'billing', 'profile', 'saved', 'activity', 'analytics', 'schedule', 'settings', 'crew', 'discover']
 
 export function AppShell() {
+  const router = useRouter()
   const user = useApp((s) => s.user)
   const view = useApp((s) => s.view)
-  const openAuth = useApp((s) => s.openAuth)
   const setView = useApp((s) => s.setView)
   const mainRef = useRef<HTMLDivElement>(null)
   const [onboardingOpen, setOnboardingOpen] = useState(false)
@@ -39,10 +40,9 @@ export function AppShell() {
   // If an auth-required view is active without a user, bounce to landing + prompt auth
   useEffect(() => {
     if (!user && AUTH_VIEWS.includes(view)) {
-      setView('landing')
-      openAuth('login')
+      router.push('/login')
     }
-  }, [user, view, setView, openAuth])
+  }, [user, view, router])
 
   // Auto-trigger onboarding for newly-signed-up users (no bio AND created within last 5 minutes AND not seen before)
   // Uses a guard flag to avoid repeated checks after the first resolution.

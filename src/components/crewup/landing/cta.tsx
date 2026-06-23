@@ -1,11 +1,11 @@
 'use client'
 
-import { useApp } from '@/lib/store'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { ArrowRight, Star, ShieldCheck, TrendingUp } from 'lucide-react'
 
 export function CTA() {
-  const openAuth = useApp((s) => s.openAuth)
+  const router = useRouter()
   return (
     <section className="py-16 sm:py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -79,7 +79,7 @@ export function CTA() {
                   <Button
                     size="lg"
                     variant="secondary"
-                    onClick={() => openAuth('signup')}
+                    onClick={() => router.push('/signup')}
                     className="h-12 px-7 text-base font-semibold transition-transform hover:scale-[1.03] animate-pulse-glow"
                   >
                     Create your free account <ArrowRight className="ml-1 h-4 w-4" />
@@ -87,7 +87,7 @@ export function CTA() {
                   <Button
                     size="lg"
                     variant="outline"
-                    onClick={() => openAuth('login')}
+                    onClick={() => router.push('/login')}
                     className="h-12 px-7 text-base font-semibold border-primary-foreground/40 bg-transparent text-primary-foreground transition-transform hover:scale-[1.03] hover:bg-primary-foreground/10 hover:text-primary-foreground"
                   >
                     I already have an account

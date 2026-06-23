@@ -3,7 +3,6 @@
 import { useEffect } from 'react'
 import { useApp } from '@/lib/store'
 import { LandingPage } from '@/components/crewup/landing/landing-page'
-import { AuthModal } from '@/components/crewup/auth/auth-modal'
 import { AppShell } from '@/components/crewup/app/app-shell'
 import { Loader2 } from 'lucide-react'
 
@@ -13,7 +12,6 @@ export default function Home() {
   const authResolved = useApp((s) => s.authResolved)
   const view = useApp((s) => s.view)
   const refreshUser = useApp((s) => s.refreshUser)
-  const authModalOpen = useApp((s) => s.authModalOpen)
 
   useEffect(() => {
     refreshUser()
@@ -29,19 +27,9 @@ export default function Home() {
   }
 
   if (view === 'landing') {
-    return (
-      <>
-        <LandingPage />
-        <AuthModal open={authModalOpen} />
-      </>
-    )
+    return <LandingPage />
   }
 
   void user
-  return (
-    <>
-      <AppShell />
-      <AuthModal open={authModalOpen} />
-    </>
-  )
+  return <AppShell />
 }

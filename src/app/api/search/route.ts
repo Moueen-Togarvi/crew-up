@@ -66,10 +66,10 @@ export async function GET(req: NextRequest) {
   let subcontractors: Array<{
     id: string
     name: string
-    trade: string | null
-    company: string | null
-    city: string | null
-    state: string | null
+    trade: string | null | undefined
+    company: string | null | undefined
+    city: string | null | undefined
+    state: string | null | undefined
     rating: number
     jobsCompleted: number
   }> = []
@@ -108,9 +108,9 @@ export async function GET(req: NextRequest) {
   let contractors: Array<{
     id: string
     name: string
-    company: string | null
-    city: string | null
-    state: string | null
+    company: string | null | undefined
+    city: string | null | undefined
+    state: string | null | undefined
     rating: number
   }> = []
   try {

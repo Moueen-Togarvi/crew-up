@@ -13,7 +13,7 @@ export async function POST(_req: NextRequest, ctx: { params: Promise<{ id: strin
     return NextResponse.json({ error: 'Only the job owner can accept bids' }, { status: 403 })
   }
   // accept this bid, reject others, mark job assigned
-  const [rejectedBids] = await db.$transaction([
+  const [_, rejectedBids] = await db.$transaction([
     db.bid.update({ where: { id }, data: { status: 'ACCEPTED' } }),
     db.bid.updateMany({ where: { jobId: bid.jobId, id: { not: id }, status: 'PENDING' }, data: { status: 'REJECTED' } }),
     db.job.update({ where: { id: bid.jobId }, data: { status: 'ASSIGNED', assignedToId: bid.subcontractorId } }),
