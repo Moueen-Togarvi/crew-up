@@ -18,7 +18,7 @@ import { GoogleLoginButton } from './google-login-button'
 import { ResendVerification } from './resend-verification'
 
 export function AuthModal({ open }: { open: boolean }) {
-  const { authMode, closeAuth, setUser, setView, openAuth } = useApp()
+  const { authMode, closeAuth, setUser, setView, openAuth, view } = useApp()
   const { toast } = useToast()
   const [tab, setTab] = useState<'login' | 'signup'>(authMode)
   const [loading, setLoading] = useState(false)

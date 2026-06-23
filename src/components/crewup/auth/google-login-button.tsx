@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { useApp } from '@/lib/store'
 import { useToast } from '@/hooks/use-toast'

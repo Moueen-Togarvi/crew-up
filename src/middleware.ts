@@ -6,6 +6,8 @@ const ALLOWED_ORIGINS = [
   'http://localhost:3001',
   'http://localhost:3002',
   'http://localhost:3003',
+  'http://127.0.0.1:3000',
+  'http://192.168.0.106:3000',
   'http://21.0.13.39:81',
 ]
 
