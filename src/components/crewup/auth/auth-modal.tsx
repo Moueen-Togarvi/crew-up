@@ -12,7 +12,10 @@ import { api } from '@/lib/api'
 import { useToast } from '@/hooks/use-toast'
 import { TRADES, US_STATES } from '@/lib/constants'
 import type { PublicUser } from '@/lib/constants'
-import { Loader2, HardHat, Wrench, Mail, Lock, User as UserIcon, Building2, Phone, MapPin } from 'lucide-react'
+import { Loader2, HardHat, Wrench, Mail, Lock, User as UserIcon, Building2, Phone, MapPin, Key, AlertCircle } from 'lucide-react'
+import { ForgotPasswordDialog } from './forgot-password-dialog'
+import { GoogleLoginButton } from './google-login-button'
+import { ResendVerification } from './resend-verification'
 
 export function AuthModal({ open }: { open: boolean }) {
   const { authMode, closeAuth, setUser, setView, openAuth } = useApp()
@@ -115,9 +118,15 @@ export function AuthModal({ open }: { open: boolean }) {
               <Field icon={Lock} label="Password">
                 <Input type="password" placeholder="••••••••" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} className="pl-9" onKeyDown={(e) => e.key === 'Enter' && doLogin()} />
               </Field>
+              <div className="text-right">
+                <button type="button" onClick={() => setView('forgot-password')} className="text-xs text-muted-foreground hover:text-primary transition-colors">
+                  Forgot password?
+                </button>
+              </div>
               <Button className="w-full" onClick={doLogin} disabled={loading}>
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Log in'}
               </Button>
+              <GoogleLoginButton onLogin={() => closeAuth()} />
 
               <div className="relative py-1">
                 <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-border" /></div>
@@ -133,6 +142,11 @@ export function AuthModal({ open }: { open: boolean }) {
               </div>
               <p className="text-center text-xs text-muted-foreground">Click a demo account to sign in instantly</p>
             </TabsContent>
+
+            {/* FORGOT PASSWORD */}
+            {view === 'forgot-password' && (
+              <ForgotPasswordDialog open={view === 'forgot-password'} onClose={() => setView('login')} />
+            )}
 
             {/* SIGNUP */}
             <TabsContent value="signup" className="mt-5 space-y-4">
@@ -187,9 +201,11 @@ export function AuthModal({ open }: { open: boolean }) {
               <Button className="w-full" onClick={doSignup} disabled={loading}>
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : `Create ${role === 'CONTRACTOR' ? 'contractor' : 'subcontractor'} account`}
               </Button>
+              <GoogleLoginButton onLogin={() => closeAuth()} />
               <p className="text-center text-xs text-muted-foreground">
                 By signing up you agree to our Terms and Privacy Policy.
               </p>
+              <ResendVerification email={su.email} />
             </TabsContent>
           </Tabs>
         </div>

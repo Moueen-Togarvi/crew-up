@@ -5,184 +5,216 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id            String   @id @default(cuid())
-  email         String   @unique
-  passwordHash  String
-  name          String
-  role          String   @default("SUBCONTRACTOR") // CONTRACTOR | SUBCONTRACTOR
-  company       String?
-  phone         String?
-  city          String?
-  state         String?
-  avatarUrl     String?
-  bio           String?
+  id                String         @id @default(cuid())
+  email             String         @unique
+  passwordHash      String
+  name              String
+  role              String         @default("SUBCONTRACTOR") // CONTRACTOR | SUBCONTRACTOR
+  company           String?
+  phone             String?
+  city              String?
+  state             String?
+  avatarUrl         String?
+  bio               String?
   // subcontractor specific
-  trade         String?  // e.g. Electrical, Plumbing, Framing
-  skills        String?  // comma separated
-  hourlyRate    Float?
-  rating        Float    @default(0)
-  reviewCount   Int      @default(0)
-  jobsCompleted Int      @default(0)
-  verified      Boolean  @default(false)
+  trade             String? // e.g. Electrical, Plumbing, Framing
+  skills            String? // comma separated
+  hourlyRate        Float?
+  rating            Float          @default(0)
+  reviewCount       Int            @default(0)
+  jobsCompleted     Int            @default(0)
+  verified          Boolean        @default(false)
   // subscription
-  plan          String   @default("FREE") // FREE | PRO | ENTERPRISE
+  plan              String         @default("FREE") // FREE | PRO | ENTERPRISE
+  // email verification
+  emailVerified     DateTime?
+  verificationToken String?        @unique
+  resetToken        String?        @unique
+  resetExpires      DateTime?
+  // 2FA
+  twoFactorSecret   String?
+  twoFactorEnabled  Boolean        @default(false)
   // relations
-  jobsPosted       Job[]         @relation("JobContractor")
-  bids             Bid[]
-  reviewsGiven     Review[]      @relation("ReviewAuthor")
-  reviewsReceived  Review[]      @relation("ReviewTarget")
-  conversationsA   Conversation[] @relation("ConvUserA")
-  conversationsB   Conversation[] @relation("ConvUserB")
-  messagesSent     Message[]
-  subscription     Subscription?
-  favorites        Favorite[]
-  favoritedBy      Favorite[]   @relation("FavTarget")
-  notifications    Notification[]
-  crewMembers  CrewMember[] @relation("CrewOwner")
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  jobsPosted        Job[]          @relation("JobContractor")
+  bids              Bid[]
+  reviewsGiven      Review[]       @relation("ReviewAuthor")
+  reviewsReceived   Review[]       @relation("ReviewTarget")
+  conversationsA    Conversation[] @relation("ConvUserA")
+  conversationsB    Conversation[] @relation("ConvUserB")
+  messagesSent      Message[]
+  subscription      Subscription?
+  favorites         Favorite[]
+  favoritedBy       Favorite[]     @relation("FavTarget")
+  notifications     Notification[]
+  crewMembers       CrewMember[]   @relation("CrewOwner")
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
 }
 
 model Favorite {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   // either a job or a subcontractor is favorited
-  jobId     String?
-  job       Job?     @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId        String?
+  job          Job?     @relation(fields: [jobId], references: [id], onDelete: Cascade)
   targetUserId String?
-  targetUser   User? @relation("FavTarget", fields: [targetUserId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
+  targetUser   User?    @relation("FavTarget", fields: [targetUserId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
 
   @@unique([userId, jobId])
   @@unique([userId, targetUserId])
+  @@index([userId])
+  @@index([jobId])
+  @@index([targetUserId])
 }
 
 model Notification {
   id        String   @id @default(cuid())
-  userId    String   // recipient
+  userId    String // recipient
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type      String   // NEW_BID | BID_ACCEPTED | BID_REJECTED | NEW_MESSAGE | NEW_REVIEW | JOB_ASSIGNED
+  type      String // NEW_BID | BID_ACCEPTED | BID_REJECTED | NEW_MESSAGE | NEW_REVIEW | JOB_ASSIGNED
   title     String
   body      String
-  link      String?  // e.g. job id / conversation id
+  link      String? // e.g. job id / conversation id
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model Job {
-  id            String   @id @default(cuid())
-  title         String
-  description   String
-  trade         String   // Electrical, Plumbing, Framing, Roofing, Concrete, HVAC, etc.
-  category      String   @default("General") // General | Commercial | Residential | Industrial
-  budgetMin     Float
-  budgetMax     Float
-  location      String
-  city          String?
-  state         String?
-  duration      String   // e.g. "1-2 weeks"
-  crewSize      Int      @default(1)
-  urgency       String   @default("STANDARD") // URGENT | STANDARD | FLEXIBLE
-  status        String   @default("OPEN") // OPEN | ASSIGNED | COMPLETED | CANCELLED
-  contractorId  String
-  contractor    User     @relation("JobContractor", fields: [contractorId], references: [id])
-  bids          Bid[]
-  favorites     Favorite[]
-  milestones    Milestone[]
-  assignedToId  String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id           String      @id @default(cuid())
+  title        String
+  description  String
+  trade        String // Electrical, Plumbing, Framing, Roofing, Concrete, HVAC, etc.
+  category     String      @default("General") // General | Commercial | Residential | Industrial
+  budgetMin    Float
+  budgetMax    Float
+  location     String
+  city         String?
+  state        String?
+  duration     String // e.g. "1-2 weeks"
+  crewSize     Int         @default(1)
+  urgency      String      @default("STANDARD") // URGENT | STANDARD | FLEXIBLE
+  status       String      @default("OPEN") // OPEN | ASSIGNED | COMPLETED | CANCELLED
+  contractorId String
+  contractor   User        @relation("JobContractor", fields: [contractorId], references: [id])
+  bids         Bid[]
+  favorites    Favorite[]
+  milestones   Milestone[]
+  assignedToId String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@index([contractorId])
+  @@index([assignedToId])
 }
 
 model Bid {
-  id          String   @id @default(cuid())
-  amount      Float
-  message     String
-  duration    String
-  status      String   @default("PENDING") // PENDING | ACCEPTED | REJECTED
-  jobId       String
-  job         Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  id              String   @id @default(cuid())
+  amount          Float
+  message         String
+  duration        String
+  status          String   @default("PENDING") // PENDING | ACCEPTED | REJECTED
+  jobId           String
+  job             Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
   subcontractorId String
-  subcontractor User  @relation(fields: [subcontractorId], references: [id])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  subcontractor   User     @relation(fields: [subcontractorId], references: [id])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([jobId])
+  @@index([subcontractorId])
 }
 
 model Conversation {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userAId   String
   userBId   String
   jobId     String?
-  userA     User     @relation("ConvUserA", fields: [userAId], references: [id])
-  userB     User     @relation("ConvUserB", fields: [userBId], references: [id])
+  userA     User      @relation("ConvUserA", fields: [userAId], references: [id])
+  userB     User      @relation("ConvUserB", fields: [userBId], references: [id])
   messages  Message[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([userAId])
+  @@index([userBId])
+  @@index([jobId])
 }
 
 model Message {
-  id              String   @id @default(cuid())
-  conversationId  String
-  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  senderId        String
-  sender          User     @relation(fields: [senderId], references: [id])
-  body            String
-  read            Boolean  @default(false)
-  createdAt       DateTime @default(now())
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id])
+  body           String
+  read           Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId])
+  @@index([senderId])
 }
 
 model Review {
-  id         String   @id @default(cuid())
-  authorId   String
-  author     User     @relation("ReviewAuthor", fields: [authorId], references: [id])
-  targetId   String
-  target     User     @relation("ReviewTarget", fields: [targetId], references: [id])
-  jobId      String?
-  rating     Int
-  comment    String
-  createdAt  DateTime @default(now())
+  id        String   @id @default(cuid())
+  authorId  String
+  author    User     @relation("ReviewAuthor", fields: [authorId], references: [id])
+  targetId  String
+  target    User     @relation("ReviewTarget", fields: [targetId], references: [id])
+  jobId     String?
+  rating    Int
+  comment   String
+  createdAt DateTime @default(now())
+
+  @@index([authorId])
+  @@index([targetId])
+  @@index([jobId])
 }
 
 model Subscription {
-  id           String   @id @default(cuid())
-  userId       String   @unique
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  plan         String   @default("FREE") // FREE | PRO | ENTERPRISE
-  status       String   @default("ACTIVE") // ACTIVE | CANCELED | PAST_DUE
-  stripeCustomerId  String?
-  stripeSubId       String?
-  currentPeriodEnd  DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id               String    @id @default(cuid())
+  userId           String    @unique
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan             String    @default("FREE") // FREE | PRO | ENTERPRISE
+  status           String    @default("ACTIVE") // ACTIVE | CANCELED | PAST_DUE
+  stripeCustomerId String?
+  stripeSubId      String?
+  currentPeriodEnd DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 }
 
 model Milestone {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   jobId       String
-  job         Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  job         Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
   title       String
   description String?
-  dueOffset   Int      @default(0)  // days from job assignment
-  completed   Boolean  @default(false)
+  dueOffset   Int       @default(0) // days from job assignment
+  completed   Boolean   @default(false)
   completedAt DateTime?
-  order       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  order       Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([jobId])
 }
 
 model CrewMember {
   id          String   @id @default(cuid())
-  ownerUserId String   // the subcontractor who owns this crew
+  ownerUserId String // the subcontractor who owns this crew
   owner       User     @relation("CrewOwner", fields: [ownerUserId], references: [id], onDelete: Cascade)
   name        String
-  role        String   // e.g. "Foreman", "Lead Electrician", "Apprentice", "Laborer"
-  trade       String?  // optional specialty
+  role        String // e.g. "Foreman", "Lead Electrician", "Apprentice", "Laborer"
+  trade       String? // optional specialty
   phone       String?
   email       String?
   hourlyRate  Float?
@@ -190,4 +222,6 @@ model CrewMember {
   notes       String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([ownerUserId])
 }

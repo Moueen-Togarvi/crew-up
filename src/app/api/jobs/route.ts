@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getSession } from '@/lib/auth'
 import { toPublicUser } from '@/lib/serialize'
+import { jobSchema } from '@/lib/validations'
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
@@ -64,24 +65,26 @@ export async function POST(req: NextRequest) {
   }
   try {
     const body = await req.json()
-    const { title, description, trade, category, budgetMin, budgetMax, location, city, state, duration, crewSize, urgency } = body
-    if (!title || !description || !trade || !location || budgetMin == null || budgetMax == null) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    const parsed = jobSchema.safeParse(body)
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Invalid input', details: parsed.error.format() }, { status: 400 })
     }
+    const { title, description, trade, category, budgetMin, budgetMax, location, city, state, duration, crewSize, urgency } = parsed.data
+
     const job = await db.job.create({
       data: {
         title,
         description,
         trade,
-        category: category || 'General',
-        budgetMin: Number(budgetMin),
-        budgetMax: Number(budgetMax),
+        category,
+        budgetMin,
+        budgetMax,
         location,
         city: city || null,
         state: state || null,
-        duration: duration || 'Flexible',
-        crewSize: Number(crewSize) || 1,
-        urgency: urgency || 'STANDARD',
+        duration,
+        crewSize,
+        urgency,
         contractorId: session.userId,
       },
       include: { contractor: true, bids: { include: { subcontractor: true } } },
@@ -96,7 +99,7 @@ export async function POST(req: NextRequest) {
       },
     })
   } catch (e) {
-    console.error(e)
+    console.error('Job creation error:', e)
     return NextResponse.json({ error: 'Failed to create job' }, { status: 500 })
   }
 }

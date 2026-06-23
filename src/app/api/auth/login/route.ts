@@ -4,6 +4,7 @@ import { db } from '@/lib/db'
 import { signSession, setSessionCookie } from '@/lib/auth'
 import { toPublicUser } from '@/lib/serialize'
 import { rateLimit } from '@/lib/rate-limit'
+import { loginSchema } from '@/lib/validations'
 
 export async function POST(req: NextRequest) {
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
@@ -13,10 +14,13 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { email, password } = await req.json()
-    if (!email || !password) {
-      return NextResponse.json({ error: 'Email and password are required' }, { status: 400 })
+    const body = await req.json()
+    const parsed = loginSchema.safeParse(body)
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Invalid input', details: parsed.error.format() }, { status: 400 })
     }
+    const { email, password } = parsed.data
+
     const user = await db.user.findUnique({ where: { email: email.toLowerCase().trim() } })
     if (!user) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
@@ -29,6 +33,7 @@ export async function POST(req: NextRequest) {
     await setSessionCookie(token)
     return NextResponse.json({ user: toPublicUser(user) })
   } catch (e) {
+    console.error('Login error:', e)
     return NextResponse.json({ error: 'Login failed' }, { status: 500 })
   }
 }

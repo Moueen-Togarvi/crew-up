@@ -21,6 +21,7 @@ export type View =
   | 'settings'
   | 'crew'
   | 'discover'
+  | 'forgot-password'
 
 interface AppState {
   // auth

@@ -4,8 +4,9 @@ import { db } from '@/lib/db'
 import { signSession, setSessionCookie } from '@/lib/auth'
 import { toPublicUser } from '@/lib/serialize'
 import { rateLimit } from '@/lib/rate-limit'
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+import { generateVerificationToken, getVerificationUrl, formatVerificationEmail, sendEmail } from '@/lib/email'
+import { v4 as uuidv4 } from 'uuid'
+import { signupSchema } from '@/lib/validations'
 
 export async function POST(req: NextRequest) {
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
@@ -16,24 +17,20 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json()
-    const { email, password, name, role, company, trade, city, state, phone } = body
-    if (!email || !password || !name || !role) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    const parsed = signupSchema.safeParse(body)
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Invalid input', details: parsed.error.format() }, { status: 400 })
     }
-    if (!EMAIL_RE.test(email)) {
-      return NextResponse.json({ error: 'Invalid email format' }, { status: 400 })
-    }
-    if (password.length < 8) {
-      return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 })
-    }
-    if (!['CONTRACTOR', 'SUBCONTRACTOR'].includes(role)) {
-      return NextResponse.json({ error: 'Invalid role' }, { status: 400 })
-    }
+    const { email, password, name, role, company, trade, city, state, phone } = parsed.data
+
     const existing = await db.user.findUnique({ where: { email: email.toLowerCase().trim() } })
     if (existing) {
       return NextResponse.json({ error: 'An account with this email already exists' }, { status: 409 })
     }
     const passwordHash = await bcrypt.hash(password, 12)
+    const verificationToken = generateVerificationToken()
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+
     const user = await db.user.create({
       data: {
         email: email.toLowerCase().trim(),
@@ -46,11 +43,26 @@ export async function POST(req: NextRequest) {
         state: state || null,
         phone: phone || null,
         verified: false,
+        verificationToken,
       },
     })
     await db.subscription.create({
       data: { userId: user.id, plan: 'FREE', status: 'ACTIVE' },
     })
+
+    // Send verification email
+    const verificationUrl = getVerificationUrl(baseUrl, verificationToken)
+    try {
+      await sendEmail({
+        to: user.email,
+        subject: 'Verify your email - CrewUp',
+        html: formatVerificationEmail(user.name, verificationUrl),
+      })
+    } catch (e) {
+      console.error('Failed to send verification email:', e)
+      // Don't fail signup if email fails, just log it
+    }
+
     const token = await signSession({ userId: user.id, email: user.email, role: user.role })
     await setSessionCookie(token)
     return NextResponse.json({ user: toPublicUser(user) })
