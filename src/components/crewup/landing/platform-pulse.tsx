@@ -243,7 +243,7 @@ export function PlatformPulse() {
             A marketplace that <span className="text-gradient-primary">never sleeps</span>
           </h2>
           <p className="mt-3 text-muted-foreground">
-            Jobs posted, bids placed, and crews hired — every minute of every day. Here&apos;s what&apos;s happening on CrewUp right now.
+            Jobs posted, bids placed, and crews hired — every minute of every day. Here&apos;s what&apos;s happening on BuildUp right now.
           </p>
         </div>
 

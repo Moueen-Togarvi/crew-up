@@ -12,7 +12,7 @@ export function Logo({ className, showText = true }: { className?: string; showT
       </div>
       {showText && (
         <span className="text-xl font-extrabold tracking-tight">
-          Crew<span className="text-primary">Up</span>
+          Build<span className="text-primary">Up</span>
         </span>
       )}
     </div>

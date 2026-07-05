@@ -1,4 +1,4 @@
-// CrewUp shared constants & types
+// BuildUp shared constants & types
 
 export const TRADES = [
   "Electrical",

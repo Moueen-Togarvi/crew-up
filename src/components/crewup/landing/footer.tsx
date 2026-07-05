@@ -64,7 +64,7 @@ export function Footer() {
         </div>
 
         <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-border pt-6 sm:flex-row">
-          <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} CrewUp. Built for the trades.</p>
+          <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} BuildUp. Built for the trades.</p>
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
             <span className="flex items-center gap-1.5"><HardHat className="h-3.5 w-3.5 text-primary" /> Contractors</span>
             <span className="flex items-center gap-1.5"><Wrench className="h-3.5 w-3.5 text-primary" /> Subcontractors</span>

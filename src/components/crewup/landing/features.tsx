@@ -21,7 +21,7 @@ export function Features() {
           <p className="text-sm font-bold uppercase tracking-wider text-primary">Features</p>
           <h2 className="mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">Everything you need to run the job</h2>
           <p className="mt-3 text-muted-foreground">
-            From the first bid to the final inspection, CrewUp keeps contractors and subcontractors on the same page.
+            From the first bid to the final inspection, BuildUp keeps contractors and subcontractors on the same page.
           </p>
         </div>
 

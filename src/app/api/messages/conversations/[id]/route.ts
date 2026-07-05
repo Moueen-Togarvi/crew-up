@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getSession } from '@/lib/auth'
 import { notify } from '@/lib/notify'
+import { messageSchema } from '@/lib/validations'
 
 export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params
@@ -38,8 +39,12 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   if (convo.userAId !== session.userId && convo.userBId !== session.userId) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
-  const { body } = await req.json()
-  if (!body) return NextResponse.json({ error: 'Empty message' }, { status: 400 })
+  const raw = await req.json()
+  const parsed = messageSchema.safeParse(raw)
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Invalid input', details: parsed.error.format() }, { status: 400 })
+  }
+  const body = parsed.data.body
   const message = await db.message.create({
     data: { conversationId: id, senderId: session.userId, body },
   })
@@ -63,7 +68,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-internal-secret': process.env.INTERNAL_SECRET || 'crewup-internal',
+        'x-internal-secret': process.env.INTERNAL_SECRET,
       },
       body: JSON.stringify({
         event: 'message',

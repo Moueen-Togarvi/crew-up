@@ -171,7 +171,7 @@ export function BillingView() {
               <div className="flex items-center gap-3">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <div>
-                  <p className="font-medium">CrewUp {currentPlan === 'FREE' ? 'Pro' : currentPlan} — Monthly</p>
+                  <p className="font-medium">BuildUp {currentPlan === 'FREE' ? 'Pro' : currentPlan} — Monthly</p>
                   <p className="text-xs text-muted-foreground">{new Date(2024, 11 - i, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</p>
                 </div>
               </div>

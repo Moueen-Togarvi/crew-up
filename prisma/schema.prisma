@@ -1,4 +1,4 @@
-// CrewUp — contractor/subcontractor marketplace schema
+// BuildUp — contractor/subcontractor marketplace schema
 
 generator client {
   provider = "prisma-client-js"
@@ -32,13 +32,16 @@ model User {
   // subscription
   plan              String         @default("FREE") // FREE | PRO | ENTERPRISE
   // email verification
-  emailVerified     DateTime?
-  verificationToken String?        @unique
-  resetToken        String?        @unique
+  emailVerified        DateTime?
+  verificationToken    String?        @unique
+  verificationExpires  DateTime?
+  resetToken           String?        @unique
   resetExpires      DateTime?
   // 2FA
   twoFactorSecret   String?
   twoFactorEnabled  Boolean        @default(false)
+  // session revocation — incremented on password change to invalidate old JWTs
+  sessionVersion    Int            @default(0)
   // relations
   jobsPosted        Job[]          @relation("JobContractor")
   bids              Bid[]

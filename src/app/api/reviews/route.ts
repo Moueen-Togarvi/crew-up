@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getSession } from '@/lib/auth'
 import { toPublicUser } from '@/lib/serialize'
+import { reviewSchema } from '@/lib/validations'
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
@@ -24,13 +25,12 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const session = await getSession()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { targetId, rating, comment, jobId } = await req.json()
-  if (!targetId || !rating || !comment) {
-    return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
+  const body = await req.json()
+  const parsed = reviewSchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Invalid input', details: parsed.error.format() }, { status: 400 })
   }
-  if (rating < 1 || rating > 5) {
-    return NextResponse.json({ error: 'Rating must be 1-5' }, { status: 400 })
-  }
+  const { targetId, rating, comment, jobId } = parsed.data
   if (targetId === session.userId) {
     return NextResponse.json({ error: 'Cannot review yourself' }, { status: 400 })
   }

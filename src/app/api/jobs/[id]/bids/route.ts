@@ -3,6 +3,7 @@ import { db } from '@/lib/db'
 import { getSession } from '@/lib/auth'
 import { toPublicUser } from '@/lib/serialize'
 import { notify } from '@/lib/notify'
+import { bidSchema } from '@/lib/validations'
 
 export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const session = await getSession()
@@ -44,8 +45,11 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   const existing = await db.bid.findFirst({ where: { jobId: id, subcontractorId: session.userId } })
   if (existing) return NextResponse.json({ error: 'You have already bid on this job' }, { status: 400 })
   const body = await req.json()
-  const { amount, message, duration } = body
-  if (!amount || !message) return NextResponse.json({ error: 'Amount and message are required' }, { status: 400 })
+  const parsed = bidSchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Invalid input', details: parsed.error.format() }, { status: 400 })
+  }
+  const { amount, message, duration } = parsed.data
   const bid = await db.bid.create({
     data: {
       amount: Number(amount),

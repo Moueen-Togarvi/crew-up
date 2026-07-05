@@ -29,7 +29,16 @@ export async function POST(req: NextRequest) {
     if (!ok) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
     }
-    const token = await signSession({ userId: user.id, email: user.email, role: user.role })
+
+    // Check email verification (skip for OAuth users with empty password hash)
+    if (!user.emailVerified && user.passwordHash) {
+      return NextResponse.json(
+        { error: 'Please verify your email first', code: 'EMAIL_NOT_VERIFIED', email: user.email },
+        { status: 403 }
+      )
+    }
+
+    const token = await signSession({ userId: user.id, email: user.email, role: user.role, sessionVersion: user.sessionVersion })
     await setSessionCookie(token)
     return NextResponse.json({ user: toPublicUser(user) })
   } catch (e) {

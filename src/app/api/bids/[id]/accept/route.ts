@@ -7,19 +7,50 @@ export async function POST(_req: NextRequest, ctx: { params: Promise<{ id: strin
   const { id } = await ctx.params
   const session = await getSession()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const bid = await db.bid.findUnique({ where: { id }, include: { job: true } })
-  if (!bid) return NextResponse.json({ error: 'Bid not found' }, { status: 404 })
-  if (bid.job.contractorId !== session.userId) {
-    return NextResponse.json({ error: 'Only the job owner can accept bids' }, { status: 403 })
-  }
-  // accept this bid, reject others, mark job assigned
-  const [_, rejectedBids] = await db.$transaction([
-    db.bid.update({ where: { id }, data: { status: 'ACCEPTED' } }),
-    db.bid.updateMany({ where: { jobId: bid.jobId, id: { not: id }, status: 'PENDING' }, data: { status: 'REJECTED' } }),
-    db.job.update({ where: { id: bid.jobId }, data: { status: 'ASSIGNED', assignedToId: bid.subcontractorId } }),
-  ])
 
-  const job = bid.job
+  // Perform the entire accept flow inside a single transaction to prevent
+  // TOCTOU races (two concurrent requests both seeing the bid as PENDING).
+  const result = await db.$transaction(async (tx) => {
+    const bid = await tx.bid.findUnique({
+      where: { id },
+      include: { job: true },
+    })
+    if (!bid) return null
+
+    if (bid.job.contractorId !== session.userId) {
+      return { error: 'Only the job owner can accept bids', status: 403 }
+    }
+    if (bid.status !== 'PENDING') {
+      return { error: 'Bid is no longer pending', status: 409 }
+    }
+    if (bid.job.status !== 'OPEN') {
+      return { error: 'Job is no longer open for bidding', status: 400 }
+    }
+
+    // Accept this bid, reject others, mark job assigned
+    const [, rejectedBids] = await Promise.all([
+      tx.bid.update({ where: { id }, data: { status: 'ACCEPTED' } }),
+      tx.bid.updateMany({
+        where: { jobId: bid.jobId, id: { not: id }, status: 'PENDING' },
+        data: { status: 'REJECTED' },
+      }),
+      tx.job.update({
+        where: { id: bid.jobId },
+        data: { status: 'ASSIGNED', assignedToId: bid.subcontractorId },
+      }),
+    ])
+
+    return { bid, job: bid.job, rejectedCount: rejectedBids.count }
+  })
+
+  if (!result) {
+    return NextResponse.json({ error: 'Bid not found' }, { status: 404 })
+  }
+  if ('error' in result) {
+    return NextResponse.json({ error: result.error }, { status: result.status as number })
+  }
+
+  const { bid, job, rejectedCount } = result
 
   // Notify the accepted subcontractor
   await notify({
@@ -30,10 +61,10 @@ export async function POST(_req: NextRequest, ctx: { params: Promise<{ id: strin
     link: job.id,
   })
 
-  // Notify rejected subcontractors
-  if (rejectedBids && rejectedBids.count > 0) {
+  // Notify rejected subcontractors (best-effort, outside transaction)
+  if (rejectedCount > 0) {
     const others = await db.bid.findMany({
-      where: { jobId: bid.jobId, id: { not: id }, status: 'REJECTED' },
+      where: { jobId: job.id, id: { not: id }, status: 'REJECTED' },
       select: { subcontractorId: true },
     })
     for (const o of others) {

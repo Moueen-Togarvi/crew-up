@@ -50,7 +50,7 @@ export function AppShell() {
     if (!user || onboardingChecked) return
     const markChecked = () => setOnboardingChecked(true)
     try {
-      const seenKey = `crewup_onboarding_seen_${user.id}`
+      const seenKey = `buildup_onboarding_seen_${user.id}`
       const seen = localStorage.getItem(seenKey)
       if (seen) {
         markChecked()
@@ -75,7 +75,7 @@ export function AppShell() {
     setOnboardingOpen(open)
     if (!open && user) {
       try {
-        localStorage.setItem(`crewup_onboarding_seen_${user.id}`, '1')
+        localStorage.setItem(`buildup_onboarding_seen_${user.id}`, '1')
       } catch {
         /* ignore */
       }

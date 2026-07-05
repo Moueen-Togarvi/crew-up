@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { generateVerificationToken, getVerificationUrl, formatVerificationEmail, sendEmail } from '@/lib/email'
+import { generateVerificationToken, generateVerificationUrl, formatVerificationEmail, sendEmail } from '@/lib/email'
 import { rateLimit } from '@/lib/rate-limit'
 
 export async function POST(req: NextRequest) {
@@ -31,16 +31,16 @@ export async function POST(req: NextRequest) {
 
     const verificationToken = generateVerificationToken()
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-    const verificationUrl = getVerificationUrl(baseUrl, verificationToken)
+    const verificationUrl = generateVerificationUrl(baseUrl, verificationToken)
 
     await db.user.update({
       where: { id: user.id },
-      data: { verificationToken },
+      data: { verificationToken, verificationExpires: new Date(Date.now() + 24 * 60 * 60 * 1000) },
     })
 
     await sendEmail({
       to: user.email,
-      subject: 'Verify your email - CrewUp',
+      subject: 'Verify your email - BuildUp',
       html: formatVerificationEmail(user.name, verificationUrl),
     })
 

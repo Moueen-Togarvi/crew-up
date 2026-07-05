@@ -225,7 +225,7 @@ export function CommandPalette() {
       >
         <DialogTitle className="sr-only">Command palette</DialogTitle>
         <DialogDescription className="sr-only">
-          Search jobs, subcontractors, contractors, and navigate CrewUp.
+          Search jobs, subcontractors, contractors, and navigate BuildUp.
         </DialogDescription>
         <Command
           shouldFilter={false}
@@ -491,7 +491,7 @@ export function CommandPalette() {
             </div>
             <span className="hidden items-center gap-1.5 font-medium text-foreground/70 sm:flex">
               <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-              CrewUp Search
+              BuildUp Search
             </span>
           </div>
         </Command>

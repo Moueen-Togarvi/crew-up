@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
 
     await sendEmail({
       to: user.email,
-      subject: 'Reset your password - CrewUp',
+      subject: 'Reset your password - BuildUp',
       html: formatResetEmail(user.name, resetUrl),
     })
 

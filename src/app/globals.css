@@ -502,7 +502,7 @@
 }
 
 /* Glass card — frosted overlay card with backdrop blur.
-   Uses color-mix() for alpha (CrewUp tokens are full OKLCH colors, not HSL channels). */
+   Uses color-mix() for alpha (BuildUp tokens are full OKLCH colors, not HSL channels). */
 .glass-card {
   background: color-mix(in oklch, var(--card) 80%, transparent);
   backdrop-filter: blur(12px);
@@ -512,7 +512,7 @@
 }
 
 /* Gradient text headline — primary → primary/0.7 (theme-aware via --primary token).
-   Spec uses `hsl(var(--primary))` but CrewUp tokens are OKLCH color values (not HSL channels),
+   Spec uses `hsl(var(--primary))` but BuildUp tokens are OKLCH color values (not HSL channels),
    so we use color-mix() to derive the 70%-alpha stop in OKLCH color space. */
 .text-gradient-primary {
   background: linear-gradient(

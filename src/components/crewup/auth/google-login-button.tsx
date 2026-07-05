@@ -5,7 +5,14 @@ import { Button } from '@/components/ui/button'
 import { useApp } from '@/lib/store'
 import { useToast } from '@/hooks/use-toast'
 import { useSearchParams } from 'next/navigation'
-import { Loader2, AlertCircle } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
+
+/** Generate a cryptographically random CSRF state token and store it in sessionStorage */
+function generateState(): string {
+  const array = new Uint8Array(32)
+  crypto.getRandomValues(array)
+  return Array.from(array, (b) => b.toString(16).padStart(2, '0')).join('')
+}
 
 export function GoogleLoginButton({ onLogin }: { onLogin?: () => void }) {
   const { toast } = useToast()
@@ -37,6 +44,14 @@ export function GoogleLoginButton({ onLogin }: { onLogin?: () => void }) {
       return
     }
 
+    // Generate and store a CSRF state token
+    const state = generateState()
+    try {
+      sessionStorage.setItem('oauth_state', state)
+    } catch {
+      /* sessionStorage not available */
+    }
+
     const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
       new URLSearchParams({
         client_id: clientId,
@@ -45,6 +60,7 @@ export function GoogleLoginButton({ onLogin }: { onLogin?: () => void }) {
         scope: scope,
         access_type: 'offline',
         prompt: 'consent',
+        state: state,
       })
 
     window.location.href = authUrl

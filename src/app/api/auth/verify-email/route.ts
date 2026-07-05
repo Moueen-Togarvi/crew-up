@@ -23,12 +23,18 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Email already verified' }, { status: 400 })
     }
 
+    // Enforce token expiry (24 hours)
+    if (user.verificationExpires && user.verificationExpires < new Date()) {
+      return NextResponse.json({ error: 'Verification token has expired. Please request a new one.' }, { status: 400 })
+    }
+
     // Update user with verified email
     await db.user.update({
       where: { id: user.id },
       data: {
         emailVerified: new Date(),
         verificationToken: null,
+        verificationExpires: null,
       },
     })
 

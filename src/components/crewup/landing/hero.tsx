@@ -46,7 +46,7 @@ export function Hero() {
         }}
       >
         <img
-          src="/crewup/hero-ai.png"
+          src="/buildup/hero-ai.png"
           alt="Construction professionals"
           className="h-full w-full object-cover object-[70%_center]"
         />
@@ -84,7 +84,7 @@ export function Hero() {
               className="mt-5 max-w-xl text-lg text-muted-foreground animate-fade-in-up"
               style={{ animationDelay: '160ms' }}
             >
-              CrewUp connects contractors with vetted subcontractors across the country. Post jobs, compare bids, message crews, and manage your pipeline — all in one place.
+              BuildUp connects contractors with vetted subcontractors across the country. Post jobs, compare bids, message crews, and manage your pipeline — all in one place.
             </p>
 
             {/* role quick links */}

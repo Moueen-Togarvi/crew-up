@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getSession } from '@/lib/auth'
 import { toPublicUser } from '@/lib/serialize'
+import { favoriteSchema } from '@/lib/validations'
 
 // GET /api/favorites?type=job|sub — list the current user's favorites
 export async function GET(req: NextRequest) {
@@ -42,10 +43,12 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const session = await getSession()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const { jobId, targetUserId } = await req.json()
-  if (!jobId && !targetUserId) {
-    return NextResponse.json({ error: 'Must specify jobId or targetUserId' }, { status: 400 })
+  const body = await req.json()
+  const parsed = favoriteSchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Invalid input', details: parsed.error.format() }, { status: 400 })
   }
+  const { jobId, targetUserId } = parsed.data
   if (targetUserId === session.userId) {
     return NextResponse.json({ error: 'Cannot favorite yourself' }, { status: 400 })
   }

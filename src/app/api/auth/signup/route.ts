@@ -4,7 +4,7 @@ import { db } from '@/lib/db'
 import { signSession, setSessionCookie } from '@/lib/auth'
 import { toPublicUser } from '@/lib/serialize'
 import { rateLimit } from '@/lib/rate-limit'
-import { generateVerificationToken, getVerificationUrl, formatVerificationEmail, sendEmail } from '@/lib/email'
+import { generateVerificationToken, generateVerificationUrl, formatVerificationEmail, sendEmail } from '@/lib/email'
 import { v4 as uuidv4 } from 'uuid'
 import { signupSchema } from '@/lib/validations'
 
@@ -44,6 +44,7 @@ export async function POST(req: NextRequest) {
         phone: phone || null,
         verified: false,
         verificationToken,
+        verificationExpires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
       },
     })
     await db.subscription.create({
@@ -51,11 +52,11 @@ export async function POST(req: NextRequest) {
     })
 
     // Send verification email
-    const verificationUrl = getVerificationUrl(baseUrl, verificationToken)
+    const verificationUrl = generateVerificationUrl(baseUrl, verificationToken)
     try {
       await sendEmail({
         to: user.email,
-        subject: 'Verify your email - CrewUp',
+        subject: 'Verify your email - BuildUp',
         html: formatVerificationEmail(user.name, verificationUrl),
       })
     } catch (e) {
@@ -63,7 +64,7 @@ export async function POST(req: NextRequest) {
       // Don't fail signup if email fails, just log it
     }
 
-    const token = await signSession({ userId: user.id, email: user.email, role: user.role })
+    const token = await signSession({ userId: user.id, email: user.email, role: user.role, sessionVersion: user.sessionVersion })
     await setSessionCookie(token)
     return NextResponse.json({ user: toPublicUser(user) })
   } catch (e) {

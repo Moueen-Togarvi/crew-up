@@ -4,7 +4,7 @@ import { Star } from 'lucide-react'
 
 const testimonials = [
   {
-    quote: 'CrewUp cut the time we spend sourcing subs in half. We posted an electrical build-out and had three qualified bids by lunch.',
+    quote: 'BuildUp cut the time we spend sourcing subs in half. We posted an electrical build-out and had three qualified bids by lunch.',
     name: 'Marcus Hale',
     role: 'GC, BuildRight Construction Co.',
     rating: 5,

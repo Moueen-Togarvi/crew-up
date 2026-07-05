@@ -139,6 +139,13 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
   // Accepts status='COMPLETED' (and legacy status assignments) plus
   // assignedToId updates. COMPLETED notifies the assigned sub + bumps their
   // completed-jobs counter.
+
+  // Whitelist allowed status values to prevent arbitrary injection
+  const ALLOWED_STATUSES = new Set(['OPEN', 'ASSIGNED', 'COMPLETED', 'CANCELLED'])
+  if (body.status && !ALLOWED_STATUSES.has(body.status)) {
+    return NextResponse.json({ error: `Invalid status value: "${body.status}"` }, { status: 400 })
+  }
+
   const updated = await db.job.update({
     where: { id },
     data: {

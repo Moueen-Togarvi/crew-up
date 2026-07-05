@@ -33,7 +33,7 @@ export function HowItWorks() {
           <p className="text-sm font-bold uppercase tracking-wider text-primary">How it works</p>
           <h2 className="mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">Two sides of the same job site</h2>
           <p className="mt-3 text-muted-foreground">
-            Whether you&apos;re hiring crews or looking for work, CrewUp keeps the whole process moving.
+            Whether you&apos;re hiring crews or looking for work, BuildUp keeps the whole process moving.
           </p>
         </div>
 

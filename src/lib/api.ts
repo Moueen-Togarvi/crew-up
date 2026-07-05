@@ -1,4 +1,4 @@
-// Lightweight fetch helper for the CrewUp API
+// Lightweight fetch helper for the BuildUp API
 export async function api<T = unknown>(
   path: string,
   opts?: { method?: string; body?: unknown; headers?: Record<string, string> }

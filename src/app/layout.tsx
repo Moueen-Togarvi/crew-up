@@ -15,11 +15,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CrewUp — Connect Contractors & Subcontractors",
+  title: "BuildUp — Connect Contractors & Subcontractors",
   description:
-    "CrewUp connects contractors with subcontractors. Find work, hire crews, manage opportunities, and build reliable business relationships in construction.",
+    "BuildUp connects contractors with subcontractors. Find work, hire crews, manage opportunities, and build reliable business relationships in construction.",
   keywords: [
-    "CrewUp",
+    "BuildUp",
     "construction marketplace",
     "contractors",
     "subcontractors",
@@ -27,15 +27,15 @@ export const metadata: Metadata = {
     "hire construction workers",
     "construction jobs",
   ],
-  authors: [{ name: "CrewUp" }],
+  authors: [{ name: "BuildUp" }],
   icons: {
     icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
   },
   openGraph: {
-    title: "CrewUp — Construction Workforce Marketplace",
+    title: "BuildUp — Construction Workforce Marketplace",
     description:
       "Find work, hire crews, manage opportunities, and build reliable business relationships.",
-    siteName: "CrewUp",
+    siteName: "BuildUp",
     type: "website",
   },
 };

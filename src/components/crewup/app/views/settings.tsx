@@ -182,7 +182,7 @@ export function SettingsView() {
   // Load notification prefs from localStorage
   useEffect(() => {
     try {
-      const stored = localStorage.getItem('crewup_notif_prefs')
+      const stored = localStorage.getItem('buildup_notif_prefs')
       if (stored) setNotifPrefs(JSON.parse(stored))
     } catch {
       /* ignore */
@@ -192,7 +192,7 @@ export function SettingsView() {
   // Persist notif prefs
   useEffect(() => {
     try {
-      localStorage.setItem('crewup_notif_prefs', JSON.stringify(notifPrefs))
+      localStorage.setItem('buildup_notif_prefs', JSON.stringify(notifPrefs))
     } catch {
       /* ignore */
     }
@@ -317,7 +317,7 @@ export function SettingsView() {
         id="profile"
         icon={UserIcon}
         title="Profile information"
-        description="Update how you appear to others on CrewUp."
+        description="Update how you appear to others on BuildUp."
         delay={0}
       >
         {/* Avatar preview + URL */}
@@ -419,7 +419,7 @@ export function SettingsView() {
         id="appearance"
         icon={Palette}
         title="Appearance"
-        description="Choose how CrewUp looks on this device."
+        description="Choose how BuildUp looks on this device."
         accent="bg-violet-500/10 text-violet-600 dark:text-violet-400"
         delay={60}
       >
@@ -547,7 +547,7 @@ export function SettingsView() {
               </span>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Current plan</p>
-                <p className="text-sm font-medium">CrewUp {user.plan}</p>
+                <p className="text-sm font-medium">BuildUp {user.plan}</p>
               </div>
             </div>
             <Button variant="outline" size="sm" onClick={() => setView('billing')}>

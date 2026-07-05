@@ -1,11 +1,12 @@
 import { SignJWT, jwtVerify } from 'jose'
 import { cookies } from 'next/headers'
+import { db } from '@/lib/db'
 
-const SESSION_COOKIE = 'crewup_session'
+const SESSION_COOKIE = 'buildup_session'
 
 function getSecret(): Uint8Array {
   const secret = process.env.SESSION_SECRET
-  if (!secret || secret === 'crewup-dev-secret-change-me-in-production-please') {
+  if (!secret || secret === 'buildup-dev-secret-change-me-in-production-please') {
     throw new Error(
       'SESSION_SECRET environment variable is required. Generate one with: openssl rand -base64 48'
     )
@@ -17,6 +18,8 @@ export interface SessionPayload {
   userId: string
   email: string
   role: string
+  /** Incremented on the User model whenever a password is changed; old JWTs are rejected. */
+  sessionVersion: number
 }
 
 export async function signSession(payload: SessionPayload): Promise<string> {
@@ -36,11 +39,36 @@ export async function verifySession(token: string): Promise<SessionPayload | nul
   }
 }
 
+/**
+ * Get the current session, verifying both the JWT signature AND that the
+ * `sessionVersion` stored in the token still matches the value in the DB.
+ *
+ * Returns `null` if the cookie is missing, the token is invalid/expired,
+ * or the sessionVersion has changed (e.g. password was reset).
+ */
 export async function getSession(): Promise<SessionPayload | null> {
   const store = await cookies()
   const token = store.get(SESSION_COOKIE)?.value
   if (!token) return null
-  return await verifySession(token)
+
+  const payload = await verifySession(token)
+  if (!payload) return null
+
+  // Verify sessionVersion hasn't been bumped (password change invalidates old sessions)
+  try {
+    const user = await db.user.findUnique({
+      where: { id: payload.userId },
+      select: { sessionVersion: true },
+    })
+    if (!user || user.sessionVersion !== payload.sessionVersion) {
+      return null
+    }
+  } catch {
+    // If DB is unreachable, fail closed — deny the session
+    return null
+  }
+
+  return payload
 }
 
 export async function setSessionCookie(token: string) {

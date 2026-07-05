@@ -117,7 +117,7 @@ function actionText(a: ActivityItem): string {
     case 'REVIEW_LEFT':
       return `left a ${a.rating ?? 5}★ review for`
     case 'USER_JOINED':
-      return 'joined CrewUp'
+      return 'joined BuildUp'
   }
 }
 
@@ -369,7 +369,7 @@ export function ActivityView() {
                     Activity feed
                   </h1>
                   <p className="text-sm text-primary-foreground/90">
-                    See what&apos;s happening across CrewUp right now
+                    See what&apos;s happening across BuildUp right now
                   </p>
                 </div>
               </div>

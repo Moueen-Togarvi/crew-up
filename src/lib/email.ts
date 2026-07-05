@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer'
+import { randomBytes } from 'crypto'
 
-const EMAIL_FROM = process.env.EMAIL_FROM || 'CrewUp <noreply@crewup.com>'
+const EMAIL_FROM = process.env.EMAIL_FROM || 'BuildUp <noreply@buildup.com>'
 
 export interface EmailOptions {
   to: string
@@ -33,14 +34,14 @@ export async function sendEmail({ to, subject, html }: EmailOptions): Promise<vo
 }
 
 export function generateVerificationToken(): string {
-  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+  return randomBytes(32).toString('hex')
 }
 
 export function generateResetToken(): string {
-  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+  return randomBytes(32).toString('hex')
 }
 
-export function getVerificationUrl(base: string, token: string): string {
+export function generateVerificationUrl(base: string, token: string): string {
   return `${base}/api/auth/verify-email?token=${token}`
 }
 
@@ -48,14 +49,25 @@ export function getResetUrl(base: string, token: string): string {
   return `${base}/api/auth/reset-password?token=${token}`
 }
 
+/** HTML-escape user-supplied strings to prevent XSS in email templates */
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 export function formatVerificationEmail(name: string, url: string): string {
+  const safeName = escapeHtml(name)
   return `
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Verify your email - CrewUp</title>
+  <title>Verify your email - BuildUp</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -129,19 +141,19 @@ export function formatVerificationEmail(name: string, url: string): string {
   <div class="container">
     <div class="header">
       <h1>🚧 Verify your email</h1>
-      <p>Welcome to CrewUp!</p>
+      <p>Welcome to BuildUp!</p>
     </div>
     <div class="content">
-      <h2>Thanks for signing up, ${name}!</h2>
+      <h2>Thanks for signing up, ${safeName}!</h2>
       <p>Please verify your email address to complete your signup. This helps us keep your account secure.</p>
       <p><strong>Click the button below to verify your email:</strong></p>
       <a href="${url}" class="button">Verify my email</a>
       <p>This link will expire in 24 hours.</p>
-      <p>If you didn't create an account on CrewUp, you can safely ignore this email.</p>
+      <p>If you didn't create an account on BuildUp, you can safely ignore this email.</p>
     </div>
     <div class="footer">
-      <p>This was sent from CrewUp</p>
-      <p>© ${new Date().getFullYear()} CrewUp. All rights reserved.</p>
+      <p>This was sent from BuildUp</p>
+      <p>© ${new Date().getFullYear()} BuildUp. All rights reserved.</p>
     </div>
   </div>
 </body>
@@ -150,13 +162,14 @@ export function formatVerificationEmail(name: string, url: string): string {
 }
 
 export function formatResetEmail(name: string, url: string): string {
+  const safeName = escapeHtml(name)
   return `
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reset your password - CrewUp</title>
+  <title>Reset your password - BuildUp</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -233,8 +246,8 @@ export function formatResetEmail(name: string, url: string): string {
       <p>Need a new password?</p>
     </div>
     <div class="content">
-      <h2>Hi ${name},</h2>
-      <p>We received a request to reset your password for your CrewUp account.</p>
+      <h2>Hi ${safeName},</h2>
+      <p>We received a request to reset your password for your BuildUp account.</p>
       <p><strong>Click the button below to reset your password:</strong></p>
       <a href="${url}" class="button">Reset my password</a>
       <p>This link will expire in 15 minutes.</p>
@@ -242,8 +255,8 @@ export function formatResetEmail(name: string, url: string): string {
       <p>To keep your account secure, please don't share this link with anyone.</p>
     </div>
     <div class="footer">
-      <p>This was sent from CrewUp</p>
-      <p>© ${new Date().getFullYear()} CrewUp. All rights reserved.</p>
+      <p>This was sent from BuildUp</p>
+      <p>© ${new Date().getFullYear()} BuildUp. All rights reserved.</p>
     </div>
   </div>
 </body>
@@ -252,6 +265,7 @@ export function formatResetEmail(name: string, url: string): string {
 }
 
 export function formatWelcomeEmail(name: string, role: string): string {
+  const safeName = escapeHtml(name)
   const roleText = role === 'CONTRACTOR' ? 'hire crews' : 'find work'
   return `
 <!DOCTYPE html>
@@ -259,7 +273,7 @@ export function formatWelcomeEmail(name: string, role: string): string {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Welcome to CrewUp - Construction Marketplace</title>
+  <title>Welcome to BuildUp - Construction Marketplace</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -329,12 +343,12 @@ export function formatWelcomeEmail(name: string, role: string): string {
 <body>
   <div class="container">
     <div class="header">
-      <h1>🎉 Welcome to CrewUp!</h1>
+      <h1>🎉 Welcome to BuildUp!</h1>
       <p>Your construction marketplace is ready</p>
     </div>
     <div class="content">
-      <h2>Hi ${name}!</h2>
-      <p>Great to have you on CrewUp! We're excited to help you ${roleText}.</p>
+      <h2>Hi ${safeName}!</h2>
+      <p>Great to have you on BuildUp! We're excited to help you ${roleText}.</p>
 
       <div class="feature">
         <h3>🏗️ What you can do</h3>
@@ -356,8 +370,8 @@ export function formatWelcomeEmail(name: string, role: string): string {
       <p><strong>Need help?</strong> Check out our <a href="#" style="color: #3b82f6;">Getting Started Guide</a></p>
     </div>
     <div class="footer">
-      <p>This was sent from CrewUp</p>
-      <p>© ${new Date().getFullYear()} CrewUp. All rights reserved.</p>
+      <p>This was sent from BuildUp</p>
+      <p>© ${new Date().getFullYear()} BuildUp. All rights reserved.</p>
     </div>
   </div>
 </body>

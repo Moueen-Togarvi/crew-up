@@ -35,6 +35,8 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false)
 
+  const showDemo = process.env.NEXT_PUBLIC_ENABLE_DEMO === 'true'
+
   const doLogin = async () => {
     setLoading(true)
     try {
@@ -105,6 +107,7 @@ export default function LoginPage() {
           <div className="relative flex justify-center"><span className="bg-background px-2 text-xs text-muted-foreground">try a demo account</span></div>
         </div>
         
+        {showDemo && (
         <div className="grid grid-cols-2 gap-2">
           <Button variant="outline" size="sm" onClick={() => demoLogin('marcus@buildrightco.com')} disabled={loading} className="gap-1.5">
             <HardHat className="h-3.5 w-3.5 text-primary" /> Contractor
@@ -113,6 +116,7 @@ export default function LoginPage() {
             <Wrench className="h-3.5 w-3.5 text-primary" /> Subcontractor
           </Button>
         </div>
+        )}
         
         <p className="text-center text-xs text-muted-foreground mt-6">
           Don't have an account? <Link href="/signup" className="text-primary hover:underline">Sign up</Link>

@@ -67,7 +67,7 @@ export default function SignupPage() {
       setUser(user)
       setView('dashboard')
       router.push('/')
-      toast({ title: `Welcome to CrewUp, ${user.name.split(' ')[0]}!` })
+      toast({ title: `Welcome to BuildUp, ${user.name.split(' ')[0]}!` })
     } catch (e) {
       toast({ title: 'Sign up failed', description: (e as Error).message, variant: 'destructive' })
     } finally {
@@ -79,7 +79,7 @@ export default function SignupPage() {
     <>
       <div className="mb-6">
         <h1 className="text-2xl font-bold tracking-tight">Create your account</h1>
-        <p className="text-sm text-muted-foreground mt-1">Join CrewUp and start finding work or hiring crews.</p>
+        <p className="text-sm text-muted-foreground mt-1">Join BuildUp and start finding work or hiring crews.</p>
       </div>
 
       <div className="space-y-4">

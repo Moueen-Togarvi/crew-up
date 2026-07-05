@@ -70,7 +70,7 @@ export function CTA() {
                   className="mt-3 text-primary-foreground/90 animate-fade-in-up"
                   style={{ animationDelay: '80ms' }}
                 >
-                  Join thousands of contractors and subcontractors already using CrewUp to find work, hire crews, and grow their business.
+                  Join thousands of contractors and subcontractors already using BuildUp to find work, hire crews, and grow their business.
                 </p>
                 <div
                   className="mt-7 flex flex-col justify-center gap-3 sm:flex-row animate-fade-in-up"

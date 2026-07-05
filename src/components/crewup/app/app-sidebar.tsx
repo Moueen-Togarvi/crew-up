@@ -103,7 +103,7 @@ export function AppSidebar() {
 
       <div className="border-t border-border p-4">
         <div className="rounded-lg bg-primary/5 p-3">
-          <p className="text-xs font-semibold text-primary">{user?.plan === 'FREE' ? 'Upgrade to Pro' : 'CrewUp ' + user?.plan}</p>
+          <p className="text-xs font-semibold text-primary">{user?.plan === 'FREE' ? 'Upgrade to Pro' : 'BuildUp ' + user?.plan}</p>
           <p className="mt-1 text-xs text-muted-foreground">
             {user?.plan === 'FREE' ? 'Unlock unlimited bids and posts.' : 'Thanks for being a Pro member.'}
           </p>

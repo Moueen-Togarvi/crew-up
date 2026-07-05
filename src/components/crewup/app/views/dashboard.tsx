@@ -157,7 +157,7 @@ export function DashboardView() {
             <p className="mt-3 max-w-md text-sm text-primary-foreground/90">
               {isContractor
                 ? 'Track your posted jobs, review incoming bids, and manage your active crews.'
-                : 'Track your bids, find new work, and grow your reputation on CrewUp.'}
+                : 'Track your bids, find new work, and grow your reputation on BuildUp.'}
             </p>
           </div>
           {/* CTAs — pop-in with staggered delays (Task 9-b) */}

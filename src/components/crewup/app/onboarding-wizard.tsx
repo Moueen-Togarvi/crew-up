@@ -151,7 +151,7 @@ export function OnboardingWizard({
       }
       await api('/api/user/profile', { method: 'PATCH', body: payload })
       await refreshUser()
-      toast({ title: 'Profile complete! 🎉', description: 'Your CrewUp profile is ready.' })
+      toast({ title: 'Profile complete! 🎉', description: 'Your BuildUp profile is ready.' })
       onOpenChange(false)
       onCompleted?.()
     } catch (e) {
@@ -227,7 +227,7 @@ export function OnboardingWizard({
                 </span>
               </div>
               <DialogTitle className="mt-5 text-2xl font-extrabold tracking-tight">
-                Welcome to CrewUp{user.name ? `, ${user.name.split(' ')[0]}` : ''}!
+                Welcome to BuildUp{user.name ? `, ${user.name.split(' ')[0]}` : ''}!
               </DialogTitle>
               <DialogDescription className="mt-2 text-sm">
                 Let&apos;s set up your profile so you can start {isSubcontractor ? 'finding work' : 'hiring crews'}.
@@ -239,7 +239,7 @@ export function OnboardingWizard({
                 {[
                   { icon: UserIcon, text: 'Complete your profile so others can find you' },
                   { icon: Target, text: `Set your ${isSubcontractor ? 'trade and skills' : 'company details'}` },
-                  { icon: Star, text: 'Start building your reputation on CrewUp' },
+                  { icon: Star, text: 'Start building your reputation on BuildUp' },
                 ].map((item, i) => (
                   <div
                     key={i}

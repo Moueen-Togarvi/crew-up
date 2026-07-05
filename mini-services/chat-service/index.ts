@@ -1,5 +1,5 @@
 /**
- * CrewUp chat-service — real-time messaging relay (socket.io)
+ * BuildUp chat-service — real-time messaging relay (socket.io)
  *
  * Port 3003 (hardcoded, per project convention — do NOT use env PORT).
  * Routes via Caddy gateway: client connects to `/?XTransformPort=3003`.
@@ -10,7 +10,7 @@
  *   - `stopTyping` { conversationId, userId }         → broadcast to others
  *
  * HTTP endpoint (server-to-server, from Next.js API):
- *   POST /  with header `x-internal-secret: crewup-internal`
+ *   POST /  with header `x-internal-secret: buildup-internal`
  *   body: { event: 'message' | 'typing' | 'stopTyping', payload }
  *     - 'message':    { conversationId, recipientId, message }
  *                     → io.to('user:' + recipientId).emit('message', payload)
@@ -19,9 +19,19 @@
  */
 import { createServer, type IncomingMessage, type ServerResponse } from 'http'
 import { Server, type Socket } from 'socket.io'
+import { jwtVerify, importSPKI } from 'jose'
 
 const PORT = 3003
-const INTERNAL_SECRET = 'crewup-internal'
+const INTERNAL_SECRET = process.env.INTERNAL_SECRET
+if (!INTERNAL_SECRET) {
+  console.error('[chat-service] INTERNAL_SECRET env var is required')
+  process.exit(1)
+}
+const SESSION_SECRET = process.env.SESSION_SECRET
+if (!SESSION_SECRET) {
+  console.error('[chat-service] SESSION_SECRET env var is required for socket auth')
+  process.exit(1)
+}
 
 interface JoinPayload {
   userId: string
@@ -138,13 +148,43 @@ const io = new Server(httpServer, {
   },
   pingTimeout: 60000,
   pingInterval: 25000,
+  // Require auth token on connection handshake
+  connectionStateRecovery: {
+    maxDisconnectionDuration: 2 * 60 * 1000,
+  },
+})
+
+// Middleware: verify JWT token before allowing socket connection
+io.use(async (socket, next) => {
+  try {
+    const token = (socket.handshake.auth as Record<string, unknown>).token as string | undefined
+    if (!token) {
+      return next(new Error('Authentication required'))
+    }
+    const secret = new TextEncoder().encode(SESSION_SECRET!)
+    const { payload } = await jwtVerify(token, secret)
+    if (!payload.userId || typeof payload.userId !== 'string') {
+      return next(new Error('Invalid token payload'))
+    }
+    // Attach verified userId to socket data for later use
+    ;(socket.data as { userId: string }).userId = payload.userId as string
+    next()
+  } catch {
+    next(new Error('Invalid or expired token'))
+  }
 })
 
 io.on('connection', (socket: Socket) => {
-  console.log(`[chat-service] connected: ${socket.id}`)
+  const authedUserId = (socket.data as { userId?: string }).userId
+  console.log(`[chat-service] connected: ${socket.id} (user=${authedUserId ?? '?'})`)
 
   socket.on('join', (data: JoinPayload) => {
+    // Must join a room matching the authenticated user — prevent spoofing other users
     if (!data || typeof data.userId !== 'string') return
+    if (data.userId !== authedUserId) {
+      console.warn(`[chat-service] rejected join: socket user ${authedUserId} tried to join as ${data.userId}`)
+      return
+    }
     const room = 'user:' + data.userId
     void socket.join(room)
     socketToUser.set(socket.id, data.userId)
