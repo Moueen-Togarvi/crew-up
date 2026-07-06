@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -97,10 +97,12 @@ export default function LoginPage() {
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Log in'}
         </Button>
         
-        <GoogleLoginButton onLogin={() => {
-          setView('dashboard')
-          router.push('/')
-        }} />
+        <Suspense fallback={<div className="h-10 w-full animate-pulse rounded-md bg-muted" />}>
+          <GoogleLoginButton onLogin={() => {
+            setView('dashboard')
+            router.push('/')
+          }} />
+        </Suspense>
 
         <div className="relative py-1">
           <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-border" /></div>

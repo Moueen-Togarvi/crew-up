@@ -54,7 +54,7 @@ export function middleware(request: NextRequest) {
     const origin = request.headers.get('origin')
     const referer = request.headers.get('referer')
 
-    if (!isExactOriginMatch(origin, allowed) && !isExactOriginMatch(referer, allowed)) {
+    if (!isExactOriginMatch(origin || '', allowed) && !isExactOriginMatch(referer || '', allowed)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
   }

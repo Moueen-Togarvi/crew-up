@@ -68,7 +68,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-internal-secret': process.env.INTERNAL_SECRET,
+        'x-internal-secret': process.env.INTERNAL_SECRET || '',
       },
       body: JSON.stringify({
         event: 'message',

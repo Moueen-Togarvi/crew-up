@@ -31,7 +31,7 @@ async function verifyGoogleIdToken(idToken: string): Promise<{ email: string; na
 
     // Fetch matching key
     const keys = await fetchGoogleCerts()
-    const jwk = keys.find((k) => k.kid === kid && k.alg === alg)
+    const jwk = keys.find((k: any) => k.kid === kid && k.alg === alg)
     if (!jwk) return null
 
     // Import the key and verify the JWT

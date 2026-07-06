@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -138,10 +138,12 @@ export default function SignupPage() {
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : `Create ${role === 'CONTRACTOR' ? 'contractor' : 'subcontractor'} account`}
         </Button>
         
-        <GoogleLoginButton onLogin={() => {
-          setView('dashboard')
-          router.push('/')
-        }} />
+        <Suspense fallback={<div className="h-10 w-full animate-pulse rounded-md bg-muted" />}>
+          <GoogleLoginButton onLogin={() => {
+            setView('dashboard')
+            router.push('/')
+          }} />
+        </Suspense>
         
         <p className="text-center text-xs text-muted-foreground">
           By signing up you agree to our Terms and Privacy Policy.
