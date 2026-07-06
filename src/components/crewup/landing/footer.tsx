@@ -71,6 +71,20 @@ export function Footer() {
             <span>Made with care</span>
           </div>
         </div>
+
+        <div className="mt-6 text-center border-t border-border/50 pt-4">
+          <p className="text-sm text-muted-foreground">
+            This site developed by{' '}
+            <a
+              href="https://voquarn.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-lg font-bold text-primary hover:text-primary/80 transition-colors hover:underline inline-block align-middle"
+            >
+              Voquarn Code
+            </a>
+          </p>
+        </div>
       </div>
     </footer>
   )
